@@ -1,0 +1,23 @@
+trigger UpdateDateonAttachment on Attachment (After insert) {
+ 
+    set<Id> partid = new set<Id>(); 
+    system.debug('partid====>'+ partid);
+     List<fax__Visit__c> vc  = new  List<fax__Visit__c>();
+    List<Attachment> count = [ select Id, ParentId, Name FROM Attachment];
+    system.debug('count====>'+ count);
+       
+  for(Attachment att: Trigger.new){
+      partid.add(att.ParentId);
+      for(fax__Visit__c vst : [SELECT Id, Name, Attachment_Date_And_Time__c FROM fax__Visit__c where Id = :partid]){ 
+           
+          vst.Attachment_Date_And_Time__c = att.LastModifiedDate;
+          vst.count_number__c = count.size();
+          vc.add(vst);
+          system.debug('vst====>'+ vst);
+    }
+  }
+    if(vc.size() > 0){
+        update vc;
+        system.debug('vc====>'+ vc);
+    }         
+}
